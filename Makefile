@@ -1,23 +1,35 @@
-SYSCONF_LINK = g++
-CPPFLAGS     =
-LDFLAGS      = -pg -pedantic --coverage -O0
-LIBS         = -lm
+CXX = g++
+FLAGS = -pg -fms-extensions 
+BASIC_FLAGS = -Wall -pedantic
+LIBS = -lm
 
-DESTDIR = ./
-TARGET  = main
 
-OBJECTS := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
+TARGET = main
 
-all: $(DESTDIR)$(TARGET)
+SOURCES = $(wildcard src/*.cpp)
+OBJECTS = $(patsubst src/%.cpp, build/%.o, ${SOURCES})
+DEPS = $(patsubst src/%.cpp, build/%.dep, ${SOURCES})
 
-$(DESTDIR)$(TARGET): $(OBJECTS)
-	$(SYSCONF_LINK) -Wall $(LDFLAGS) -o $(DESTDIR)$(TARGET) $(OBJECTS) $(LIBS)
+# makes it obvious for make that clean isnt a file
+.PHONY: all clean compile 
 
-$(OBJECTS): %.o: %.cpp
-	$(SYSCONF_LINK) -Wall $(CPPFLAGS) -c $(CFLAGS) $< -o $@
+all: compile
+
+compile: ${OBJECTS}
+	@mkdir -p build/
+	${CXX} ${BASIC_FLAGS} ${FLAGS} $^
+
+build/%.o: src/%.cpp
+	@mkdir -p build/
+	${CXX} ${BASIC_FLAGS} ${FLAGS} -c $< -o $@
 
 clean:
-	-rm -f $(OBJECTS)
-	-rm -f $(TARGET)
+	-rm -rf build
 	-rm -f *.tga
+
+build/%.dep: src/%.cpp src/*
+	@mkdir -p build/
+	${CXX} -MM -MT $(patsubst src/%.cpp, build/%.o, $<) $< > $@
+
+include ${DEPS}
 
