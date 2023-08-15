@@ -19,6 +19,10 @@ template <typename T> struct Vec2 {
   Vec2() : u(0), v(0) {}
   Vec2(T _u, T _v) : u(_u), v(_v) {}
 
+  //conversion constructor
+  template <typename U>
+    Vec2(const Vec2<U>& other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)) {}
+
   inline Vec2<T> operator+(const Vec2<T> &V) const {
     return Vec2<T>{u + V.u, v + V.v};
   }

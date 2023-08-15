@@ -27,7 +27,7 @@ Model::Model(const char *filename)
     char trash;
 
     // line contains vertex information
-    if (line.compare(0, 2, "v "))
+    if (!line.compare(0, 2, "v "))
     {
       iss >> trash;
       Vec3f v;
@@ -35,7 +35,7 @@ Model::Model(const char *filename)
       verts_.push_back(v);
     }
 
-    else if (line.compare(0, 2, "f "))
+    else if (!line.compare(0, 2, "f "))
     {
       std::vector<int> f;
       int itrash, idx;
@@ -54,11 +54,11 @@ Model::Model(const char *filename)
 }
 
 int Model::nverts(){
-  return static_cast<int>(verts_.size());
+  return (int)verts_.size();
 }
 
 int Model::nfaces(){
-  return static_cast<int>(faces_.size());
+  return (int)faces_.size();
 }
 
 Vec3f Model::vert(int i){
