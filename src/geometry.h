@@ -26,6 +26,7 @@ template <typename T> struct Vec2 {
   inline Vec2<T> operator+(const Vec2<T> &V) const {
     return Vec2<T>{u + V.u, v + V.v};
   }
+
   inline Vec2<T> operator-(const Vec2<T> &V) const {
     return Vec2<T>{u - V.u, v + V.v};
   }
