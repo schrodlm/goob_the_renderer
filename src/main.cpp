@@ -109,7 +109,10 @@ int main(int argc, char **argv)
    the canvas dimensions. As a result, the vertex coordinates are transformed to fit
    within the canvas (the image's width and height).
   */
-  // model = new Model("obj/african_head.obj");
+
+  model = new Model("obj/african_head.obj");
+
+  //============================= WIREFRAME===================================
 
   // for (int i = 0; i < model->nfaces(); i++)
   // {
@@ -128,22 +131,33 @@ int main(int argc, char **argv)
 
   //     line(t0, t1, image, white);
 
-  //     std::cout << "{" << x0 << "," << x1 << "," << y0 << "," << y1 << "}" << std::endl;
   //   }
   // }
 
+  //============================= TRIANGLES ===================================
+
+  for (int i=0; i<model->nfaces(); i++) { 
+    std::vector<int> face = model->face(i); 
+    Vec2i screen_coords[3]; 
+    for (int j=0; j<3; j++) { 
+        Vec3f world_coords = model->vert(face[j]); 
+        screen_coords[j] = Vec2i((world_coords.x+1.)*width/2., (world_coords.y+1.)*height/2.); 
+    } 
+    triangle(screen_coords[0], screen_coords[1], screen_coords[2], image, TGAColor(rand()%255, rand()%255, rand()%255, 255)); 
+}
+
   //============================== TRIANGLES ======================================
 
-  Vec2i t0[3] = {Vec2i(10, 70), Vec2i(50, 160), Vec2i(70, 80)};
-  Vec2i t1[3] = {Vec2i(180, 50), Vec2i(150, 1), Vec2i(70, 180)};
-  Vec2i t2[3] = {Vec2i(180, 150), Vec2i(120, 160), Vec2i(130, 180)};
-  Vec2i t3[3] = {Vec2i(180, 150), Vec2i(120, 150), Vec2i(200, 300)};
+  // Vec2i t0[3] = {Vec2i(10, 70), Vec2i(50, 160), Vec2i(70, 80)};
+  // Vec2i t1[3] = {Vec2i(180, 50), Vec2i(150, 1), Vec2i(70, 180)};
+  // Vec2i t2[3] = {Vec2i(180, 150), Vec2i(120, 160), Vec2i(130, 180)};
+  // Vec2i t3[3] = {Vec2i(180, 150), Vec2i(120, 150), Vec2i(200, 300)};
 
 
-  triangle(t0[0], t0[1], t0[2], image, red);
-  triangle(t1[0], t1[1], t1[2], image, white);
-  triangle(t2[0], t2[1], t2[2], image, green);
-  triangle(t3[0], t3[1], t3[2], image, green);
+  // triangle(t0[0], t0[1], t0[2], image, red);
+  // triangle(t1[0], t1[1], t1[2], image, white);
+  // triangle(t2[0], t2[1], t2[2], image, green);
+  // triangle(t3[0], t3[1], t3[2], image, green);
 
 
   image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
