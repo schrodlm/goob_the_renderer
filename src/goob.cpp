@@ -102,31 +102,24 @@ void Goob::renderFlatshade(Model &model)
 
 void Goob::renderDiffuseShading(Model &model, Vec3f light_dir)
 {
-
-	for (int i = 0; i < model.nfaces(); i++)
+	for(int i = 0; i < model.nfaces(); i++)
 	{
 		std::vector<int> face = model.face(i);
-		Vec2i screen_coords[3];
 		Vec3f world_coords[3];
+		Vec2f screen_coords[3];
 
-		for (int j = 0; j < 3; j++)
-		{
-			Vec3f v = model.vert(face[j]);
-			screen_coords[j] = Vec2i((v.x + 1.) * image.get_width() / 2., (v.y + 1.) * image.get_height() / 2.);
-			world_coords[j] = v;
+		for(int j = 0; j < 3; j++){
+			world_coords[j] = model.vert(face[j]);
+			screen_coords[j] = Vec2i((world_coords[j].x + 1.) * image.get_width() / 2., (world_coords[j].y + 1.) * image.get_height() / 2.);
 		}
 
-		//computing normal TODO: what is normal
-		Vec3f n = (world_coords[2] - world_coords[0]) ^ (world_coords[1] - world_coords[0]);
-		n.normalize();
-		float intensity = n * light_dir;
-		//back-face culling -> ignoring the triangles because they are basically invisible
-		if (intensity > 0)
-		{
-			triangle(screen_coords[0], screen_coords[1], screen_coords[2], image, TGAColor(intensity * 255, intensity * 255, intensity * 255, 255));
-		}
+		Vec3f normal = compute_normal(world_coords[0], world_coords[1], world_coords[2]);
+		normal.normalize();
+		float light_intensity = normal * light_dir;
+		if(light_intensity < 0) continue;
+		triangle(screen_coords[0], screen_coords[1], screen_coords[2], image, TGAColor(255*light_intensity, 255*light_intensity, 255*light_intensity, 255));
+
 	}
-	// triangle();
 }
 
 //============================= WIREFRAME===================================
