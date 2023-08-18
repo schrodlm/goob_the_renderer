@@ -4,6 +4,10 @@
 #include <cmath>
 #include <iostream>
 #include <ostream>
+#include <limits>
+
+template <typename T>
+struct Vec3;
 
 template <typename T>
 struct Vec2
@@ -28,23 +32,30 @@ struct Vec2
   template <typename U>
   Vec2(const Vec2<U> &other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)) {}
 
-  inline Vec2<T> operator+(const Vec2<T> &V) const
-  {
-    return Vec2<T>{u + V.u, v + V.v};
-  }
+  // conversion constructor from Vec3 to Vec2
+  template <typename U>
+  Vec2(const Vec3<U> &other)
+      : x(static_cast<T>(other.x)),
+        y(static_cast<T>(other.y)) {}
 
-  inline Vec2<T> operator-(const Vec2<T> &V) const
-  {
-    return Vec2<T>{u - V.u, v + V.v};
-  }
-  inline Vec2<T> operator*(const float f) const
-  {
-    return Vec2<T>{u * f, v * f};
-  }
+inline Vec2<T> operator+(const Vec2<T> &V) const
+{
+  return Vec2<T>{u + V.u, v + V.v};
+}
 
-  template <typename>
-  friend std::ostream &operator<<(std::ostream &s, Vec2<T> &V);
-};
+inline Vec2<T> operator-(const Vec2<T> &V) const
+{
+  return Vec2<T>{u - V.u, v + V.v};
+}
+inline Vec2<T> operator*(const float f) const
+{
+  return Vec2<T>{u * f, v * f};
+}
+
+template <typename>
+friend std::ostream &operator<<(std::ostream &s, Vec2<T> &V);
+}
+;
 
 template <typename T>
 struct Vec3
@@ -64,6 +75,10 @@ struct Vec3
 
   Vec3() : x(0), y(0), z(0) {}
   Vec3(T _x, T _y, T _z) : x(_x), y(_y), z(_z) {}
+
+  // conversion from Vec3 to Vec2
+  template <typename U>
+  Vec3(const Vec2<U> &other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), z(-std::numeric_limits<U>::max()) {}
 
   // cross product
   inline Vec3<T> operator^(const Vec3<T> &V) const
@@ -94,6 +109,7 @@ struct Vec3
     *this = (*this) * (l / length());
     return *this;
   }
+  
 
   template <typename>
   friend std::ostream &operator<<(std::ostream &out, const Vec3<T> &V);

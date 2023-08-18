@@ -3,7 +3,16 @@
 
 #include "goob.h"
 
+
+//================================= LINE ===============================================
+
 void Goob::line(Vec2i t0, Vec2i t1, TGAImage &image, const TGAColor &color)
+{
+	line((Vec3i) t0, (Vec3i) t1, image, color);
+}
+
+
+void Goob::line(Vec3i t0, Vec3i t1, TGAImage &image, const TGAColor &color)
 {
 	// bound check
 	int width = image.get_width();
@@ -15,49 +24,47 @@ void Goob::line(Vec2i t0, Vec2i t1, TGAImage &image, const TGAColor &color)
 	unsigned int bigger_steps = std::max(std::abs(t1.x - t0.x), std::abs(t1.y - t0.y));
 	Vec2f step = {((t1.x - t0.x) / (float)bigger_steps), ((t1.y - t0.y) / (float)bigger_steps)};
 
-	Vec2f current_t = t0;
+	Vec2f current_t = (Vec2f)t0;
 
 	for (unsigned int i = 0; i <= bigger_steps; i++)
 	{
 		image.set((int)(current_t.x + 0.5), (int)(current_t.y + 0.5), color);
-		current_t.x += step.x;
-		current_t.y += step.y;
+		addStep(current_t, step);
 	}
 }
 
+//=================================TRIANGLE===============================================
 void Goob::triangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, const TGAColor &color)
 {
+	triangle((Vec3i)t0, (Vec3i)t1, (Vec3i)t2, image, color);
+}
 
-	// Sort vertices by y-coordinate
-	if (t0.y > t1.y)
-		std::swap(t0, t1);
-	if (t0.y > t2.y)
-		std::swap(t0, t2);
-	if (t1.y > t2.y)
-		std::swap(t1, t2);
+void Goob::triangle(Vec3i t0, Vec3i t1, Vec3i t2, TGAImage &image, const TGAColor &color)
+{
 
+	sortTriangleVerticesByY(t0,t1,t2);
+
+	
 	// Compute the vertical span of the triangle
 	int deltaY = t2.y - t0.y;
 
 	if (deltaY == 0)
 		return; // triangle is a degenerate point, nothing to fill.
 
-	float x_step1 = (float)(t2.x - t0.x) / deltaY;
-	float y_step1 = 1;
+	Vec2f step1((float)(t2.x - t0.x)/deltaY, 1);
+	Vec2f step2;
 
-	float x_step2;
-	float y_step2;
 
 	// Check if t1.y and t0.y are different to prevent division by zero
 	if (t1.y != t0.y)
 	{
-		x_step2 = (float)(t1.x - t0.x) / (t1.y - t0.y);
-		y_step2 = 1; //(float)(t1.y - t0.y) / (t1.y - t0.y);
+		step2.x = (float)(t1.x - t0.x) / (t1.y - t0.y);
+		step2.y = 1; //(float)(t1.y - t0.y) / (t1.y - t0.y);
 	}
 	else
 	{
-		x_step2 = 0;
-		y_step2 = 1;
+		step2.x = 0;
+		step2.y = 1;
 	}
 
 	Vec2f current_t0 = t0;
@@ -66,19 +73,17 @@ void Goob::triangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, const TGAColo
 	for (int i = 0; i <= deltaY; i++)
 	{
 		if (i == (t1.y - t0.y))
-		{ // Switch to the bottom half of the triangle
-			x_step2 = (t2.y - t1.y) != 0 ? (float)(t2.x - t1.x) / (t2.y - t1.y) : 0;
-			y_step2 = 1.0;
+		{ 
+			// Switch to the bottom half of the triangle
+			step2.x = (t2.y - t1.y) != 0 ? (float)(t2.x - t1.x) / (t2.y - t1.y) : 0;
+			step2.y = 1.0;
 			current_t1 = t1;
 		}
 
-		line((Vec2i)current_t0, (Vec2i)current_t1, image, color);
+		line((Vec2i)current_t0, (Vec2i)current_t1, image, color);	
 
-		current_t0.x += x_step1;
-		current_t0.y += y_step1;
-
-		current_t1.x += x_step2;
-		current_t1.y += y_step2;
+		addStep(current_t0, step1);
+		addStep(current_t1, step2);
 	}
 	return;
 }
@@ -117,7 +122,7 @@ void Goob::renderDiffuseShading(Model &model, Vec3f light_dir)
 		normal.normalize();
 		float light_intensity = normal * light_dir;
 		if(light_intensity < 0) continue;
-		triangle(screen_coords[0], screen_coords[1], screen_coords[2], image, TGAColor(255*light_intensity, 255*light_intensity, 255*light_intensity, 255));
+		triangle((Vec2i)screen_coords[0], (Vec2i)screen_coords[1], (Vec2i)screen_coords[2], image, TGAColor(255*light_intensity, 255*light_intensity, 255*light_intensity, 255));
 
 	}
 }
@@ -159,3 +164,29 @@ void Goob::finalizeRendering(const char *filename)
 	image.flip_vertically();
 	image.write_tga_file(filename);
 }
+
+
+
+void Goob::setPixelWithZBuffer(const Vec2i coords, int depth, const TGAColor& color){
+	if(z_buffer[coords.y][coords.x] < depth){
+		z_buffer[coords.y][coords.x] = depth;
+		image.set(coords.x, coords.y, color);
+	}
+}
+
+
+//UTILITIES
+	void Goob::sortTriangleVerticesByY(Vec3i& t0, Vec3i& t1, Vec3i& t2){
+	// Sort vertices by y-coordinate
+	if (t0.y > t1.y)
+		std::swap(t0, t1);
+	if (t0.y > t2.y)
+		std::swap(t0, t2);
+	if (t1.y > t2.y)
+		std::swap(t1, t2);
+	}
+
+	void Goob::addStep(Vec2f& current_step, const Vec2f toAdd){
+		current_step.x += toAdd.x;
+		current_step.y += toAdd.y;
+	}
