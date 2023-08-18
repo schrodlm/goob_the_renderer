@@ -3,14 +3,12 @@
 
 #include "goob.h"
 
-
 //================================= LINE ===============================================
 
 void Goob::line(Vec2i t0, Vec2i t1, TGAImage &image, const TGAColor &color)
 {
-	line((Vec2iZ) t0, (Vec2iZ) t1, image, color);
+	line((Vec2fZ)t0, (Vec2fZ)t1, image, color);
 }
-
 
 void Goob::line(Vec2iZ t0, Vec2iZ t1, TGAImage &image, const TGAColor &color)
 {
@@ -24,11 +22,25 @@ void Goob::line(Vec2iZ t0, Vec2iZ t1, TGAImage &image, const TGAColor &color)
 	unsigned int bigger_steps = std::max(std::abs(t1.x - t0.x), std::abs(t1.y - t0.y));
 	Vec2f step = {((t1.x - t0.x) / (float)bigger_steps), ((t1.y - t0.y) / (float)bigger_steps)};
 
+	float depthStep = (t1.z - t0.z) / static_cast<float>(bigger_steps);
+
 	Vec2f current_t = (Vec2f)t0;
+	float currentDepth = t0.z;
 
 	for (unsigned int i = 0; i <= bigger_steps; i++)
 	{
-		image.set((int)(current_t.x + 0.5), (int)(current_t.y + 0.5), color);
+		int x = static_cast<int>(current_t.x + 0.5);
+		int y = static_cast<int>(current_t.y + 0.5);
+		static int cnt = 0;
+		if (currentDepth > z_buffer[y][x])
+		{
+			z_buffer[y][x] = currentDepth;
+			image.set(x, y, color);
+			
+		}
+		else std::cout << cnt++<< std::endl;
+
+		currentDepth += depthStep;
 		addStep(current_t, step);
 	}
 }
@@ -36,24 +48,27 @@ void Goob::line(Vec2iZ t0, Vec2iZ t1, TGAImage &image, const TGAColor &color)
 //=================================TRIANGLE===============================================
 void Goob::triangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, const TGAColor &color)
 {
-	triangle((Vec2iZ)t0, (Vec2iZ)t1, (Vec2iZ)t2, image, color);
+	triangle(t0, t1, t2, image, color);
 }
 
 void Goob::triangle(Vec2iZ t0, Vec2iZ t1, Vec2iZ t2, TGAImage &image, const TGAColor &color)
 {
+	// Sort vertices by y-coordinate
+	if (t0.y > t1.y)
+		std::swap(t0, t1);
+	if (t0.y > t2.y)
+		std::swap(t0, t2);
+	if (t1.y > t2.y)
+		std::swap(t1, t2);
 
-	sortTriangleVerticesByY(t0,t1,t2);
-
-	
 	// Compute the vertical span of the triangle
 	int deltaY = t2.y - t0.y;
 
 	if (deltaY == 0)
 		return; // triangle is a degenerate point, nothing to fill.
 
-	Vec2f step1((float)(t2.x - t0.x)/deltaY, 1);
+	Vec2f step1((float)(t2.x - t0.x) / deltaY, 1);
 	Vec2f step2;
-
 
 	// Check if t1.y and t0.y are different to prevent division by zero
 	if (t1.y != t0.y)
@@ -67,20 +82,20 @@ void Goob::triangle(Vec2iZ t0, Vec2iZ t1, Vec2iZ t2, TGAImage &image, const TGAC
 		step2.y = 1;
 	}
 
-	Vec2f current_t0 = static_cast<Vec2f>(t0);
-	Vec2f current_t1 = static_cast<Vec2f>(t0);
+	Vec2fZ current_t0 = static_cast<Vec2fZ>(t0);
+	Vec2fZ current_t1 = static_cast<Vec2fZ>(t0);
 
 	for (int i = 0; i <= deltaY; i++)
 	{
-		if (i == (t1.y - t0.y))
-		{ 
+		if (i == (int)(t1.y - t0.y))
+		{
 			// Switch to the bottom half of the triangle
 			step2.x = (t2.y - t1.y) != 0 ? (float)(t2.x - t1.x) / (t2.y - t1.y) : 0;
 			step2.y = 1.0;
-			current_t1 = static_cast<Vec2f>(t1);
+			current_t1 = static_cast<Vec2fZ>(t1);
 		}
 
-		line((Vec2i)current_t0, (Vec2i)current_t1, image, color);	
+		line(current_t0, current_t1, image, color);
 
 		addStep(current_t0, step1);
 		addStep(current_t1, step2);
@@ -107,23 +122,24 @@ void Goob::renderFlatshade(Model &model)
 
 void Goob::renderDiffuseShading(Model &model, Vec3f light_dir)
 {
-	for(int i = 0; i < model.nfaces(); i++)
+	for (int i = 0; i < model.nfaces(); i++)
 	{
 		std::vector<int> face = model.face(i);
 		Vec3f world_coords[3];
 		Vec2fZ screen_coords[3];
 
-		for(int j = 0; j < 3; j++){
+		for (int j = 0; j < 3; j++)
+		{
 			world_coords[j] = model.vert(face[j]);
-			screen_coords[j] = Vec2fZ((world_coords[j].x + 1.) * image.get_width() / 2., (world_coords[j].y + 1.) * image.get_height() / 2., world_coords[j].z);
+			screen_coords[j] = Vec2fZ((world_coords[j].x + 1.) * image.get_width() / 2., (world_coords[j].y + 1.) * image.get_height() / 2., world_coords[j].z );
 		}
 
 		Vec3f normal = compute_normal(world_coords[0], world_coords[1], world_coords[2]);
 		normal.normalize();
 		float light_intensity = normal * light_dir;
-		if(light_intensity < 0) continue;
-		triangle((Vec2iZ)screen_coords[0], (Vec2iZ)screen_coords[1], (Vec2iZ)screen_coords[2], image, TGAColor(255*light_intensity, 255*light_intensity, 255*light_intensity, 255));
-
+		if (light_intensity < 0)
+			continue;
+		triangle(screen_coords[0], screen_coords[1], screen_coords[2], image, TGAColor(255 * light_intensity, 255 * light_intensity, 255 * light_intensity, 255));
 	}
 }
 
@@ -165,18 +181,18 @@ void Goob::finalizeRendering(const char *filename)
 	image.write_tga_file(filename);
 }
 
-
-
-void Goob::setPixelWithZBuffer(const Vec2i coords, int depth, const TGAColor& color){
-	if(z_buffer[coords.y][coords.x] < depth){
+void Goob::setPixelWithZBuffer(const Vec2i coords, int depth, const TGAColor &color)
+{
+	if (z_buffer[coords.y][coords.x] < depth)
+	{
 		z_buffer[coords.y][coords.x] = depth;
 		image.set(coords.x, coords.y, color);
 	}
 }
 
-
-//UTILITIES
-	void Goob::sortTriangleVerticesByY(Vec3i& t0, Vec3i& t1, Vec3i& t2){
+// UTILITIES
+void Goob::sortTriangleVerticesByY(Vec3i &t0, Vec3i &t1, Vec3i &t2)
+{
 	// Sort vertices by y-coordinate
 	if (t0.y > t1.y)
 		std::swap(t0, t1);
@@ -184,9 +200,16 @@ void Goob::setPixelWithZBuffer(const Vec2i coords, int depth, const TGAColor& co
 		std::swap(t0, t2);
 	if (t1.y > t2.y)
 		std::swap(t1, t2);
-	}
+}
 
-	void Goob::addStep(Vec2f& current_step, const Vec2f toAdd){
-		current_step.x += toAdd.x;
-		current_step.y += toAdd.y;
-	}
+void Goob::addStep(Vec2f &current_step, const Vec2f toAdd)
+{
+	current_step.x += toAdd.x;
+	current_step.y += toAdd.y;
+}
+
+void Goob::addStep(Vec2fZ &current_step, const Vec2f toAdd)
+{
+	current_step.x += toAdd.x;
+	current_step.y += toAdd.y;
+}

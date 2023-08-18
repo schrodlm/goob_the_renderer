@@ -22,7 +22,7 @@ private:
 	std::vector<std::vector<float>> z_buffer;
 public:
 	Goob(TGAImage &_image) : image(_image){
-		z_buffer = std::vector<std::vector<float>>(image.get_width(), std::vector<float>(image.get_height(), std::numeric_limits<float>::max()));
+		z_buffer = std::vector<std::vector<float>>(image.get_width()+1, std::vector<float>(image.get_height()+1, -std::numeric_limits<float>::max()));
 	};
 
 	void triangle(Vec3i t0, Vec3i t1, Vec3i t2, TGAImage &image, const TGAColor &color);
@@ -41,6 +41,7 @@ public:
 private:
 	void sortTriangleVerticesByY(Vec3i& t0, Vec3i& t1, Vec3i& t2);
 	void addStep(Vec2f& current_step, const Vec2f toAdd);
+	void addStep(Vec2fZ &current_step, const Vec2f toAdd);
 };
 
 #endif

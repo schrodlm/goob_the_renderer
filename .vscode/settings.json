@@ -46,7 +46,8 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "typeinfo": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "optional": "cpp"
     },
     "cmake.sourceDirectory": "/mnt/c/dev/goob_the_renderer"
 }
