@@ -25,11 +25,11 @@ public:
 		z_buffer = std::vector<std::vector<float>>(image.get_width()+1, std::vector<float>(image.get_height()+1, -std::numeric_limits<float>::max()));
 	};
 
-	void triangle(Vec3i t0, Vec3i t1, Vec3i t2, TGAImage &image, const TGAColor &color);
-	void triangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, const TGAColor &color);
+	void triangle(Vec3i t0, Vec3i t1, Vec3i t2, const TGAColor &color);
+	void triangle(Vec2i t0, Vec2i t1, Vec2i t2, const TGAColor &color);
 	
-	void line(Vec3i t0, Vec3i t1, TGAImage &image,const TGAColor &color);
-	void line(Vec2i t0, Vec2i t1, TGAImage &image,const TGAColor &color);
+	void line(Vec3i t0, Vec3i t1,const TGAColor &color);
+	void line(Vec2i t0, Vec2i t1,const TGAColor &color);
 
 	void renderFlatshade(Model& model);
 	void renderWireframe(Model &model);

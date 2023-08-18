@@ -79,9 +79,9 @@ struct Vec3
   template <typename U>
   Vec3(const Vec3<U> &other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)),z(static_cast<T>(other.z)) {}
 
-  // conversion from Vec3 to Vec2
+  // conversion from Vec2 to Vec3
   template <typename U>
-  Vec3(const Vec2<U> &other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), z(-std::numeric_limits<U>::max()) {}
+  Vec3(const Vec2<U> &other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), z(std::numeric_limits<T>::max()) {}
 
   // cross product
   inline Vec3<T> operator^(const Vec3<T> &V) const

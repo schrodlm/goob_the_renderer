@@ -5,12 +5,12 @@
 
 //================================= LINE ===============================================
 
-void Goob::line(Vec2i t0, Vec2i t1, TGAImage &image, const TGAColor &color)
+void Goob::line(Vec2i t0, Vec2i t1, const TGAColor &color)
 {
-	line((Vec2fZ)t0, (Vec2fZ)t1, image, color);
+	line((Vec2iZ)t0, (Vec2iZ)t1, color);
 }
 
-void Goob::line(Vec2iZ t0, Vec2iZ t1, TGAImage &image, const TGAColor &color)
+void Goob::line(Vec2iZ t0, Vec2iZ t1, const TGAColor &color)
 {
 	// bound check
 	int width = image.get_width();
@@ -31,14 +31,12 @@ void Goob::line(Vec2iZ t0, Vec2iZ t1, TGAImage &image, const TGAColor &color)
 	{
 		int x = static_cast<int>(current_t.x + 0.5);
 		int y = static_cast<int>(current_t.y + 0.5);
-		static int cnt = 0;
+		
 		if (currentDepth > z_buffer[y][x])
 		{
 			z_buffer[y][x] = currentDepth;
 			image.set(x, y, color);
-			
 		}
-		else std::cout << cnt++<< std::endl;
 
 		currentDepth += depthStep;
 		addStep(current_t, step);
@@ -46,12 +44,12 @@ void Goob::line(Vec2iZ t0, Vec2iZ t1, TGAImage &image, const TGAColor &color)
 }
 
 //=================================TRIANGLE===============================================
-void Goob::triangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, const TGAColor &color)
+void Goob::triangle(Vec2i t0, Vec2i t1, Vec2i t2, const TGAColor &color)
 {
-	triangle(t0, t1, t2, image, color);
+	triangle((Vec2iZ)t0, (Vec2iZ)t1, (Vec2iZ)t2, color);
 }
 
-void Goob::triangle(Vec2iZ t0, Vec2iZ t1, Vec2iZ t2, TGAImage &image, const TGAColor &color)
+void Goob::triangle(Vec2iZ t0, Vec2iZ t1, Vec2iZ t2, const TGAColor &color)
 {
 	// Sort vertices by y-coordinate
 	if (t0.y > t1.y)
@@ -95,7 +93,7 @@ void Goob::triangle(Vec2iZ t0, Vec2iZ t1, Vec2iZ t2, TGAImage &image, const TGAC
 			current_t1 = static_cast<Vec2fZ>(t1);
 		}
 
-		line(current_t0, current_t1, image, color);
+		line(current_t0, current_t1, color);
 
 		addStep(current_t0, step1);
 		addStep(current_t1, step2);
@@ -116,7 +114,7 @@ void Goob::renderFlatshade(Model &model)
 			Vec3f world_coords = model.vert(face[j]);
 			screen_coords[j] = Vec2i((world_coords.x + 1.) * image.get_width() / 2., (world_coords.y + 1.) * image.get_height() / 2.);
 		}
-		triangle(screen_coords[0], screen_coords[1], screen_coords[2], image, TGAColor(rand() % 255, rand() % 255, rand() % 255, 255));
+		triangle(screen_coords[0], screen_coords[1], screen_coords[2], TGAColor(rand() % 255, rand() % 255, rand() % 255, 255));
 	}
 }
 
@@ -139,7 +137,7 @@ void Goob::renderDiffuseShading(Model &model, Vec3f light_dir)
 		float light_intensity = normal * light_dir;
 		if (light_intensity < 0)
 			continue;
-		triangle(screen_coords[0], screen_coords[1], screen_coords[2], image, TGAColor(255 * light_intensity, 255 * light_intensity, 255 * light_intensity, 255));
+		triangle(screen_coords[0], screen_coords[1], screen_coords[2], TGAColor(255 * light_intensity, 255 * light_intensity, 255 * light_intensity, 255));
 	}
 }
 
@@ -170,7 +168,7 @@ void Goob::renderWireframe(Model &model)
 			int y1 = (v1.y + 1.) * image.get_height() / 2.;
 			Vec2i t1(x1, y1);
 
-			line(t0, t1, image, TGAColor(255, 255, 255, 255));
+			line(t0, t1, TGAColor(255, 255, 255, 255));
 		}
 	}
 }
