@@ -8,11 +8,11 @@
 
 void Goob::line(Vec2i t0, Vec2i t1, TGAImage &image, const TGAColor &color)
 {
-	line((Vec3i) t0, (Vec3i) t1, image, color);
+	line((Vec2iZ) t0, (Vec2iZ) t1, image, color);
 }
 
 
-void Goob::line(Vec3i t0, Vec3i t1, TGAImage &image, const TGAColor &color)
+void Goob::line(Vec2iZ t0, Vec2iZ t1, TGAImage &image, const TGAColor &color)
 {
 	// bound check
 	int width = image.get_width();
@@ -36,10 +36,10 @@ void Goob::line(Vec3i t0, Vec3i t1, TGAImage &image, const TGAColor &color)
 //=================================TRIANGLE===============================================
 void Goob::triangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, const TGAColor &color)
 {
-	triangle((Vec3i)t0, (Vec3i)t1, (Vec3i)t2, image, color);
+	triangle((Vec2iZ)t0, (Vec2iZ)t1, (Vec2iZ)t2, image, color);
 }
 
-void Goob::triangle(Vec3i t0, Vec3i t1, Vec3i t2, TGAImage &image, const TGAColor &color)
+void Goob::triangle(Vec2iZ t0, Vec2iZ t1, Vec2iZ t2, TGAImage &image, const TGAColor &color)
 {
 
 	sortTriangleVerticesByY(t0,t1,t2);
@@ -111,18 +111,18 @@ void Goob::renderDiffuseShading(Model &model, Vec3f light_dir)
 	{
 		std::vector<int> face = model.face(i);
 		Vec3f world_coords[3];
-		Vec2f screen_coords[3];
+		Vec2fZ screen_coords[3];
 
 		for(int j = 0; j < 3; j++){
 			world_coords[j] = model.vert(face[j]);
-			screen_coords[j] = Vec2f((world_coords[j].x + 1.) * image.get_width() / 2., (world_coords[j].y + 1.) * image.get_height() / 2.);
+			screen_coords[j] = Vec2fZ((world_coords[j].x + 1.) * image.get_width() / 2., (world_coords[j].y + 1.) * image.get_height() / 2., world_coords[j].z);
 		}
 
 		Vec3f normal = compute_normal(world_coords[0], world_coords[1], world_coords[2]);
 		normal.normalize();
 		float light_intensity = normal * light_dir;
 		if(light_intensity < 0) continue;
-		triangle((Vec2i)screen_coords[0], (Vec2i)screen_coords[1], (Vec2i)screen_coords[2], image, TGAColor(255*light_intensity, 255*light_intensity, 255*light_intensity, 255));
+		triangle((Vec2iZ)screen_coords[0], (Vec2iZ)screen_coords[1], (Vec2iZ)screen_coords[2], image, TGAColor(255*light_intensity, 255*light_intensity, 255*light_intensity, 255));
 
 	}
 }

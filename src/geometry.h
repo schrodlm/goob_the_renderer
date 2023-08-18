@@ -76,6 +76,9 @@ struct Vec3
   Vec3() : x(0), y(0), z(0) {}
   Vec3(T _x, T _y, T _z) : x(_x), y(_y), z(_z) {}
 
+  template <typename U>
+  explicit Vec3(const Vec3<U> &other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)),z(static_cast<T>(other.z)) {}
+
   // conversion from Vec3 to Vec2
   template <typename U>
   explicit Vec3(const Vec2<U> &other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), z(-std::numeric_limits<U>::max()) {}
@@ -119,6 +122,11 @@ typedef Vec2<float> Vec2f;
 typedef Vec2<int> Vec2i;
 typedef Vec3<float> Vec3f;
 typedef Vec3<int> Vec3i;
+
+//2D vector with additional depth information (used for z-buffering, etc.)
+typedef Vec3<int> Vec2iZ;
+typedef Vec3<float> Vec2fZ;
+
 
 template <typename T>
 std::ostream &operator<<(std::ostream &out, const Vec2<T> &V)
