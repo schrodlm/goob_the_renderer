@@ -67,8 +67,8 @@ void Goob::triangle(Vec3i t0, Vec3i t1, Vec3i t2, TGAImage &image, const TGAColo
 		step2.y = 1;
 	}
 
-	Vec2f current_t0 = t0;
-	Vec2f current_t1 = t0;
+	Vec2f current_t0 = static_cast<Vec2f>(t0);
+	Vec2f current_t1 = static_cast<Vec2f>(t0);
 
 	for (int i = 0; i <= deltaY; i++)
 	{
@@ -77,7 +77,7 @@ void Goob::triangle(Vec3i t0, Vec3i t1, Vec3i t2, TGAImage &image, const TGAColo
 			// Switch to the bottom half of the triangle
 			step2.x = (t2.y - t1.y) != 0 ? (float)(t2.x - t1.x) / (t2.y - t1.y) : 0;
 			step2.y = 1.0;
-			current_t1 = t1;
+			current_t1 = static_cast<Vec2f>(t1);
 		}
 
 		line((Vec2i)current_t0, (Vec2i)current_t1, image, color);	
@@ -115,7 +115,7 @@ void Goob::renderDiffuseShading(Model &model, Vec3f light_dir)
 
 		for(int j = 0; j < 3; j++){
 			world_coords[j] = model.vert(face[j]);
-			screen_coords[j] = Vec2i((world_coords[j].x + 1.) * image.get_width() / 2., (world_coords[j].y + 1.) * image.get_height() / 2.);
+			screen_coords[j] = Vec2f((world_coords[j].x + 1.) * image.get_width() / 2., (world_coords[j].y + 1.) * image.get_height() / 2.);
 		}
 
 		Vec3f normal = compute_normal(world_coords[0], world_coords[1], world_coords[2]);

@@ -30,11 +30,11 @@ struct Vec2
 
   // conversion constructor
   template <typename U>
-  Vec2(const Vec2<U> &other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)) {}
+  explicit Vec2(const Vec2<U> &other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)) {}
 
   // conversion constructor from Vec3 to Vec2
   template <typename U>
-  Vec2(const Vec3<U> &other)
+  explicit Vec2(const Vec3<U> &other)
       : x(static_cast<T>(other.x)),
         y(static_cast<T>(other.y)) {}
 
@@ -78,7 +78,7 @@ struct Vec3
 
   // conversion from Vec3 to Vec2
   template <typename U>
-  Vec3(const Vec2<U> &other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), z(-std::numeric_limits<U>::max()) {}
+  explicit Vec3(const Vec2<U> &other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), z(-std::numeric_limits<U>::max()) {}
 
   // cross product
   inline Vec3<T> operator^(const Vec3<T> &V) const
