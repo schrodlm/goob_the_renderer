@@ -21,8 +21,8 @@ int main(int argc, char **argv)
   Model model("obj/african_head.obj");
 
   goob.renderDiffuseShading(model, Vec3f{0, 0, -1});
-  goob.line({30, 30}, {430, 430}, red);
-  goob.line({30, 430}, {430, 30}, green);
+  // goob.line({30, 30}, {430, 430}, red);
+  // goob.line({30, 430}, {430, 30}, green);
 
   goob.finalizeRendering("output.tga");
 
