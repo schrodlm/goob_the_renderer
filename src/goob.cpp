@@ -117,7 +117,7 @@ void Goob::renderFlatshade(Model &model)
 		triangle(screen_coords[0], screen_coords[1], screen_coords[2], TGAColor(rand() % 255, rand() % 255, rand() % 255, 255));
 	}
 }
-
+ 
 void Goob::renderDiffuseShading(Model &model, Vec3f light_dir)
 {
 	for (int i = 0; i < model.nfaces(); i++)

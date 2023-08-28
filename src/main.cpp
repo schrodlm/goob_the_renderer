@@ -15,15 +15,14 @@ const int height = 800;
 //================================================================
 int main(int argc, char **argv)
 {
+
+  // TEST 1 - DIFFUSE SHADING
   TGAImage image(width, height, TGAImage::RGB);
   Goob goob(image);
 
   Model model("obj/african_head.obj");
 
   goob.renderDiffuseShading(model, Vec3f{0, 0, -1});
-  // goob.line({30, 30}, {430, 430}, red);
-  // goob.line({30, 430}, {430, 30}, green);
-
   goob.finalizeRendering("output.tga");
 
   // TEST 2 - LINES
